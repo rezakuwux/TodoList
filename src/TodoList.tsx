@@ -186,7 +186,7 @@ class TodoList extends Component<Props, { textTodo: string, textEditTodo: string
   }
 }
 
-function mapStateToProps(state){
+function mapStateToProps(state: { todoList: any; }){
     var listTodo = state.todoList;
   
     return {
