@@ -7,7 +7,14 @@ import {
 import { connect } from 'react-redux';
 
 class ListItem extends React.PureComponent {
-    
+    _onPressEdit = () => {
+        this.props.onPressEdit(this.props.item);
+    }
+
+    _onPressDelete = () => {
+        this.props.onDeleteItem(this.props.item);
+    }
+  
     render() {
       const item = this.props.item;
       return (
@@ -77,6 +84,9 @@ class TodoList extends Component<Props, { textTodo: string }> {
         }
     }
     
+    _onDeleteItem = (item: any) => {
+        this.props.deleteTodo(item)
+    };
     render() {
     return (
         <View style={{padding: 10, paddingTop: 80}}>
@@ -104,7 +114,52 @@ class TodoList extends Component<Props, { textTodo: string }> {
   }
 }
 
-export default TodoList
+function mapStateToProps(state){
+    var listTodo = state.todoList.filter(function (item) {
+      return item.completed === false;
+    });
+  
+    var listCompleted = state.todoList.filter(function (item: { completed: boolean; }) {
+      return item.completed === true;
+    });
+  
+    return {
+        listTodo,
+        listCompleted,
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    return {
+        addTodo: (value: { id: any; text: any; completed: any; }) => dispatch({ 
+            type: "ADD_TODO", 
+            payLoad: {
+                id        : value.id,
+                text      : value.text,
+                completed : value.completed
+            }
+        }),
+        updateTodo: (value: { id: any; text: any; }) => dispatch({
+            type: "UPDATE_TODO",
+            payLoad: {
+                id        : value.id,
+                text      : value.text
+            }
+        }),
+        clearData: () => dispatch({
+            type: "CLEAR_DATA"
+        }),
+        deleteTodo: (value: { id: any; }) => dispatch({
+            type: "DELETE_TODO",
+            payLoad: {
+                id        : value.id
+            }
+        }),
+      
+    };
+};
+
+export default connect(mapStateToProps,mapDispatchToProps)(TodoList)
 
 
 const styles = StyleSheet.create({
