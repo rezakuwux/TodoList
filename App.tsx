@@ -11,13 +11,19 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 import TodoList from './src/TodoList';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import ReduxWrapper from 'kuwuxlib';
 
+const store = createStore(ReduxWrapper)
 
 interface Props {}
 export default class App extends Component<Props> {
   render() {
     return (
-      <TodoList />
+      <Provider store={store}>
+        <TodoList />
+      </Provider>
     );
   }
 }
