@@ -83,33 +83,40 @@ class TodoList extends Component<Props, { textTodo: string }> {
               );
         }
     }
-    
+    clearTodo = () => {
+        this.props.clearTodo()
+    }
     _onDeleteItem = (item: any) => {
         this.props.deleteTodo(item)
     };
     render() {
     return (
-        <View style={{padding: 10, paddingTop: 80}}>
-        <View style={{ flexDirection:'row' }}>
-            <TextInput
-                style={{flex: 1, height: 40}}
-                placeholder="Type here your todo list!"
-                onChangeText={(textTodo) => this.setState({textTodo})}
-                value={this.state.textTodo}
+        <View style={{flex:1, padding: 10, paddingTop: 80, flexDirection:'column'}}>
+            <View style={{ flexDirection:'row' }}>
+                <TextInput
+                    style={{flex: 1, height: 40}}
+                    placeholder="Type here your todo list!"
+                    onChangeText={(textTodo) => this.setState({textTodo})}
+                    value={this.state.textTodo}
+                />
+                <TouchableOpacity
+                    style={styles.buttonAdd}
+                    onPress={this.addTodo}
+                >
+                <Text style={{color:'#fff'}}> ADD </Text>
+                </TouchableOpacity>
+            </View>
+            <FlatList
+                data={this.props.listTodo}
+                keyExtractor={this._keyExtractor}
+                renderItem={this._renderItem}
             />
-            <TouchableOpacity
-                style={styles.buttonAdd}
-                onPress={this.addTodo}
-            >
-            <Text style={{color:'#fff'}}> ADD </Text>
+            <TouchableOpacity 
+                style={styles.buttonClear}
+                onPress={this.clearTodo}>
+                <Text style={{color:'#fff'}}> CLEAR </Text>
             </TouchableOpacity>
         </View>
-        <FlatList
-            data={this.props.listTodo}
-            keyExtractor={this._keyExtractor}
-            renderItem={this._renderItem}
-        />
-      </View>
     );
   }
 }
@@ -146,7 +153,7 @@ function mapDispatchToProps(dispatch){
                 text      : value.text
             }
         }),
-        clearData: () => dispatch({
+        clearTodo: () => dispatch({
             type: "CLEAR_DATA"
         }),
         deleteTodo: (value: { id: any; }) => dispatch({
@@ -176,6 +183,14 @@ const styles = StyleSheet.create({
       padding: 10,
       borderRadius:5,
       justifyContent: 'center'
+    },
+    buttonClear: {
+        alignItems: 'center',
+        backgroundColor: '#e50000',
+        padding: 10,
+        borderRadius:5,
+        justifyContent: 'center',
+        bottom:20
     },
     buttonEdit: {
       alignItems: 'center',
