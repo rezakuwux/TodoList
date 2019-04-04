@@ -6,6 +6,36 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 
+class ListItem extends React.PureComponent {
+    
+    render() {
+      const item = this.props.item;
+      return (
+        <View>
+            <View style={styles.rowContainer}>
+                <Text style={styles.titleCell}
+                  numberOfLines={1}>{item.text}</Text>
+                <TouchableOpacity
+                    style={styles.buttonEdit}
+                    onPress={this._onPressEdit}
+                >
+                <Text style={{color:'#fff'}}> EDIT </Text>
+                </TouchableOpacity>
+                <View style={{flex:0.04}}/>
+
+                <TouchableOpacity
+                    style={styles.buttonDelete}
+                    onPress={this._onPressDelete}
+                >
+                <Text style={{color:'#fff'}}> DELETE </Text>
+                </TouchableOpacity>
+                
+            </View>
+            <View style={styles.separator}/>
+          </View>
+      );
+    }
+}
 
 interface Props {}
 class TodoList extends Component<Props, { textTodo: string }> {
@@ -14,10 +44,26 @@ class TodoList extends Component<Props, { textTodo: string }> {
     
         this.state = {textTodo: ''};
     }
-    
+    _keyExtractor = (_item: any, index: { toString: () => void; }) => index.toString();
+    _renderItem = ({item, index}) => (
+        <ListItem
+          item={item}
+          index={index}
+          onPressEdit={this._onPressEdit}
+          onDeleteItem={this._onDeleteItem}
+        />
+    );
     addTodo = () =>{
         if (this.state.textTodo !== '') {
-            
+            let params = {
+                id        : Math.floor(Math.random() * 100) + 1,
+                text      : this.state.textTodo,
+              }
+            //   this.props.writeText(this.state.text)
+              this.props.addTodo(params)
+              this.setState({
+                textTodo: ''
+              })
         }
         else{
             Alert.alert(
@@ -30,7 +76,6 @@ class TodoList extends Component<Props, { textTodo: string }> {
               );
         }
     }
-    
     
     render() {
     return (
@@ -49,6 +94,11 @@ class TodoList extends Component<Props, { textTodo: string }> {
             <Text style={{color:'#fff'}}> ADD </Text>
             </TouchableOpacity>
         </View>
+        <FlatList
+            data={this.props.listTodo}
+            keyExtractor={this._keyExtractor}
+            renderItem={this._renderItem}
+        />
       </View>
     );
   }
