@@ -2,13 +2,15 @@ import React, {Component} from 'react';
 import {
     Platform, 
     StyleSheet, Text, View,
-    FlatList, TextInput, TouchableOpacity, Alert
+    FlatList, TextInput, TouchableOpacity, Alert,
+    Modal,TouchableHighlight
 } from 'react-native';
 import { connect } from 'react-redux';
+import EditItem from './EditItem';
 
 class ListItem extends React.PureComponent {
     _onPressEdit = () => {
-        this.props.onPressEdit(this.props.item);
+        this.props.onEditItem(this.props.item);
     }
 
     _onPressDelete = () => {
@@ -45,18 +47,18 @@ class ListItem extends React.PureComponent {
 }
 
 interface Props {}
-class TodoList extends Component<Props, { textTodo: string }> {
+class TodoList extends Component<Props, { textTodo: string, textEditTodo: string, modalVisible: boolean, editItem: any }> {
     constructor(props: Props) {
         super(props);
     
-        this.state = {textTodo: ''};
+        this.state = {textTodo: '', textEditTodo: '', modalVisible: false, editItem: null};
     }
-    _keyExtractor = (_item: any, index: { toString: () => void; }) => index.toString();
+    _keyExtractor = (item, index) => index.toString();
     _renderItem = ({item, index}) => (
         <ListItem
           item={item}
           index={index}
-          onPressEdit={this._onPressEdit}
+          onEditItem={this._onEditItem}
           onDeleteItem={this._onDeleteItem}
         />
     );
@@ -89,6 +91,42 @@ class TodoList extends Component<Props, { textTodo: string }> {
     _onDeleteItem = (item: any) => {
         this.props.deleteTodo(item)
     };
+    _onEditItem = (item: any) => {
+        this.setState(prevState => {
+            return {
+                modalVisible: true
+            }
+        });
+        this.setState({
+            textEditTodo: item.text,
+            editItem:item
+        })
+    };
+
+    cancelEdit = () => {
+        this.setState(prevState => {
+            return {
+                modalVisible: false
+            }
+          });
+    }
+    saveEdit = () => {
+        let params = {
+            id        : this.state.editItem.id,
+            text      : this.state.textEditTodo,
+          }
+        //   this.props.writeText(this.state.text)
+          
+        this.props.updateTodo(params)
+        this.setState(prevState => {
+            return {
+                modalVisible: false
+            }
+        });
+        this.setState({
+            textEditTodo: ''
+        })
+    }
     render() {
     return (
         <View style={{flex:1, padding: 10, paddingTop: 80, flexDirection:'column'}}>
@@ -116,23 +154,43 @@ class TodoList extends Component<Props, { textTodo: string }> {
                 onPress={this.clearTodo}>
                 <Text style={{color:'#fff'}}> CLEAR </Text>
             </TouchableOpacity>
+            <Modal animationType = {"slide"} transparent = {false}
+               visible = {this.state.modalVisible}
+               onRequestClose = {() => { console.log("Modal has been closed.") } }>
+               
+               <View style = {styles.modal}>
+                    <TextInput
+                            style={{paddingTop:20,height: 100}}
+                            placeholder="Type here your todo list!"
+                            onChangeText={(textEditTodo) => this.setState({textEditTodo})}
+                            value={this.state.textEditTodo}
+                    />
+                    <TouchableOpacity
+                        style={styles.buttonDelete}
+                        onPress={this.cancelEdit}
+                    >
+                    <Text style={{color:'#fff'}}> CANCEL </Text>
+                    </TouchableOpacity>
+                    <View style={{flex:0.01}}/>
+                    <TouchableOpacity
+                        style={styles.buttonEdit}
+                        onPress={this.saveEdit}
+                    >
+                    <Text style={{color:'#fff'}}> SAVE </Text>
+                    </TouchableOpacity>
+                
+               </View>
+            </Modal>
         </View>
     );
   }
 }
 
 function mapStateToProps(state){
-    var listTodo = state.todoList.filter(function (item) {
-      return item.completed === false;
-    });
-  
-    var listCompleted = state.todoList.filter(function (item: { completed: boolean; }) {
-      return item.completed === true;
-    });
+    var listTodo = state.todoList;
   
     return {
-        listTodo,
-        listCompleted,
+        listTodo
     }
 }
 
@@ -224,5 +282,18 @@ const styles = StyleSheet.create({
     separator: {
       height: 1,
       backgroundColor: '#dddddd'
-    }
+    },
+    container: {
+        alignItems: 'center',
+        backgroundColor: '#ede3f2',
+        padding: 100
+     },
+     modal: {
+        flex: 1,
+        padding: 20
+     },
+     text: {
+        color: '#3f2949',
+        marginTop: 10
+     }
 });
